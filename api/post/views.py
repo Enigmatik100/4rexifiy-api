@@ -65,10 +65,8 @@ class GetAllPost(Resource):
         data = post_parser.parse_args()
         image_file = data['image_file']  # This is FileStorage instance
         secured_filename = secure_filename(image_file.filename)
-        print(os.path.join(config.UPLOAD_FOLDER, secured_filename))
         image_file.save(os.path.join(config.UPLOAD_FOLDER, secured_filename))
 
-        print(data)
         post = Post(
             title=data.get('title'),
             content=data.get('content'),

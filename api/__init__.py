@@ -14,7 +14,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 
 
-def create_app(config=config_dict['dev']):
+def create_app(config=config_dict['prod']):
     app = Flask(__name__)
 
     app.config.from_object(config)

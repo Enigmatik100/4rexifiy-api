@@ -12,7 +12,6 @@ auth_namespace = Namespace('auth', description="a namespace for authentication")
 
 registration_model = auth_namespace.model(
     'User', {
-        'id': fields.Integer(),
         'firstname': fields.String(required=True, description="A firstname"),
         'lastname': fields.String(required=True, description="A lastname"),
         'email': fields.String(required=True, description="A email"),
@@ -46,15 +45,14 @@ class Register(Resource):
     Register user
     """
 
-    @auth_namespace.expect(registration_model)
     @auth_namespace.marshal_with(user_model)
+    @auth_namespace.expect(registration_model)
     def post(self):
         data = request.get_json()
         firstname = data.get('firstname')
         lastname = data.get('lastname')
         email = data.get('email')
         password = data.get('password')
-
         # error_message = {}
         # if not firstname:
         #     error_message['firstname'] = 'firstname is required'
@@ -81,7 +79,6 @@ class Register(Resource):
 
             return new_user, HTTPStatus.CREATED
         except Exception as e:
-            print(e)
             raise Conflict(f"User with email {data.get('email')} already exists")
 
 
@@ -97,7 +94,6 @@ class Login(Resource):
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
-        print(data)
         user = User.query.filter_by(email=email).first()
 
         if (user is not None) and check_password_hash(user.password, password):

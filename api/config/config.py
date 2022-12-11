@@ -26,8 +26,6 @@ class Config:
     LOG_WITH_GUNICORN = os.getenv('LOG_WITH_GUNICORN', default=False)
 
 
-
-
 class DevConfig(Config):
     SQLALCHEMY_ECHO = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
