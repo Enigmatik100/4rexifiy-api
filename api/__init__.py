@@ -27,7 +27,7 @@ def create_app(config=config_dict['dev']):
         }
     }
     api = Api(app,
-              title="Pizza Delivery API",
+              title="4rexify API",
               description="A REST API for 4rexify",
               authorizations=authorizations,
               security="Bearer Auth"
