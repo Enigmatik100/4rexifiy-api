@@ -1,12 +1,12 @@
-import validators
+from http import HTTPStatus
+
+from flask import request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 from flask_restx import Namespace, Resource, fields
-from flask import request, jsonify
 from werkzeug.exceptions import Conflict, BadRequest
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from ..models.models import User
-from http import HTTPStatus
-from werkzeug.security import generate_password_hash, check_password_hash
 
 auth_namespace = Namespace('auth', description="a namespace for authentication")
 
@@ -19,17 +19,17 @@ registration_model = auth_namespace.model(
     }
 )
 
-user_model = auth_namespace.model(
-    'User', {
-        'id': fields.Integer(),
-        'firstname': fields.String(required=True, description="A firstname"),
-        'lastname': fields.String(required=True, description="A lastname"),
-        'email': fields.String(required=True, description="An email"),
-        'is_active': fields.Boolean(description="This shows that User is active"),
-        'is_staff': fields.Boolean(description="This shows of use is staff")
-    }
-
-)
+# user_model = auth_namespace.model(
+#     'User', {
+#         'id': fields.Integer(),
+#         'firstname': fields.String(required=True, description="A firstname"),
+#         'lastname': fields.String(required=True, description="A lastname"),
+#         'email': fields.String(required=True, description="An email"),
+#         'is_active': fields.Boolean(description="This shows that User is active"),
+#         'is_staff': fields.Boolean(description="This shows of use is staff")
+#     }
+#
+# )
 
 login_model = auth_namespace.model(
     'Login', {
@@ -45,9 +45,12 @@ class Register(Resource):
     Register user
     """
 
-    @auth_namespace.marshal_with(user_model)
+    # @auth_namespace.marshal_with(user_model)
     @auth_namespace.expect(registration_model)
     def post(self):
+        """
+        Register  user
+        """
         data = request.get_json()
         firstname = data.get('firstname')
         lastname = data.get('lastname')
@@ -77,7 +80,14 @@ class Register(Resource):
             )
             new_user.save()
 
-            return new_user, HTTPStatus.CREATED
+            return {
+                       'id': new_user.id,
+                       'firstname': new_user.firstname,
+                       'lastname': new_user.lastname,
+                       'email': new_user.email,
+                       'is_active': new_user.is_active,
+                       'is_staff': new_user.is_staff
+                   }, HTTPStatus.CREATED
         except Exception as e:
             raise Conflict(f"User with email {data.get('email')} already exists")
 
@@ -107,12 +117,12 @@ class Login(Resource):
 
 @auth_namespace.route('/refresh')
 class Refresh(Resource):
-    """
-    Refresh user token
-    """
 
     @jwt_required(refresh=True)
     def post(self):
+        """
+            Refresh user token
+        """
         email = get_jwt_identity()
         access_token = create_access_token(identity=email)
         return {'access_token': access_token}, HTTPStatus.OK
