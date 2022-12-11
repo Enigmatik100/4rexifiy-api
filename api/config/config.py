@@ -23,6 +23,9 @@ class Config:
     UPLOAD_FOLDER = UPLOAD_FOLDER
     ALLOWED_EXTENSIONS = ["jpg", "png"]
     MAX_CONTENT_LENGTH = 1000 * 1024 * 1024  # 1000mb
+    LOG_WITH_GUNICORN = os.getenv('LOG_WITH_GUNICORN', default=False)
+
+
 
 
 class DevConfig(Config):
