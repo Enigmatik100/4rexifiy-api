@@ -18,7 +18,7 @@ Let's start now
 
 ### Clone the project
 ```
-git@github.com:codewithmide/4Rexify.git
+https://github.com/Enigmatik100/4rexifiy-api.git
 ```
 
 ### Create a virtual environment to isolate our package dependencies locally
@@ -41,6 +41,10 @@ To setup your environment variables:
 ## Usage
 Nothing is simpler than this ):
 Just run the server with `python runserver` that's all!
+
+this the url of the deployed version on `render.com`
+
+`https://fourrexify-api.onrender.com/`
 
 **Happy Coding!!!!**
 
