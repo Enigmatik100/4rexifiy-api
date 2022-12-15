@@ -100,23 +100,30 @@ class GetUpdateDeletePost(Resource):
         post = Post.query.get_or_404(post_id)
         return post, HTTPStatus.OK
 
-    @post_namespace.expect(post_model)
+    @post_namespace.expect(post_parser)
     @post_namespace.marshal_with(post_model)
     @jwt_required()
-    def put(self, post_id):
+    def patch(self, post_id):
         """
         Update post for specific user by id
         """
         db_post = Post.query.get_or_404(post_id)
-        data = post_namespace.payload
+        data = post_parser.parse_args()
 
         db_post.title = data.get('title')
         db_post.summary = data.get('summary')
         db_post.content = data.get('content')
-        db_post.image_file = data.get('image_file')
+        image_file = data['image_file']  # This is FileStorage instance
+        secured_filename = secure_filename(image_file.filename)
+        image_file.save(os.path.join(config.UPLOAD_FOLDER, secured_filename))
+        db_post.updated_at = datetime.datetime.now()
+        db_post.image_file = config.UPLOAD_FOLDER + '/' + secured_filename
+
+        email = get_jwt_identity()
+        current_user = User.query.filter_by(email=email).first()
+        db_post.user_id = current_user.id
 
         db.session.commit()
-
         return db_post, HTTPStatus.OK
 
     @post_namespace.marshal_with(post_model)

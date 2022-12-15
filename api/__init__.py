@@ -1,7 +1,12 @@
+import logging
+from logging.handlers import RotatingFileHandler
+
 from flask import Flask
+from flask.logging import default_handler
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 
 from .auth.views import auth_namespace
+from .comment.views import comment_namespace
 from .post.views import post_namespace
 from .user.views import user_namespace
 
@@ -12,6 +17,28 @@ from .models.models import User, Post, Comment
 from .utils import db
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+
+
+def configure_logging(app):
+    # Logging Configuration
+    if app.config['LOG_WITH_GUNICORN']:
+        gunicorn_error_logger = logging.getLogger('gunicorn.error')
+        app.logger.handlers.extend(gunicorn_error_logger.handlers)
+        app.logger.setLevel(logging.DEBUG)
+    else:
+        file_handler = RotatingFileHandler('instance/flask-user-management.log',
+                                           maxBytes=16384,
+                                           backupCount=20)
+        file_formatter = logging.Formatter(
+            '%(asctime)s %(levelname)s %(threadName)s-%(thread)d: %(message)s [in %(filename)s:%(lineno)d]')
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+    # Remove the default logger configured by Flask
+    app.logger.removeHandler(default_handler)
+
+    app.logger.info('Starting the Flask User Management App...')
 
 
 def create_app(config=config_dict['prod']):
@@ -32,10 +59,12 @@ def create_app(config=config_dict['prod']):
               authorizations=authorizations,
               security="Bearer Auth"
               )
-
+    api.add_namespace(comment_namespace, path='')
     api.add_namespace(user_namespace, path='')
     api.add_namespace(post_namespace, path='/posts')
     api.add_namespace(auth_namespace, path='/auth')
+
+    configure_logging(app)
 
     db.init_app(app)
     jwt = JWTManager(app)
