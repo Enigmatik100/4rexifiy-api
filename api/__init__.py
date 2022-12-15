@@ -67,12 +67,12 @@ def create_app(config=config_dict['prod']):
     api.add_namespace(post_namespace, path='/posts')
     api.add_namespace(auth_namespace, path='/auth')
 
+    configure_logging(app)
+    register_cli_commands(app)
+
     db.init_app(app)
     jwt = JWTManager(app)
     migrate = Migrate(app, db)
-
-    configure_logging(app)
-    register_cli_commands(app)
 
     @api.errorhandler(NotFound)
     def not_found(error):
