@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
+from click import echo
 from flask import Flask
 from flask.logging import default_handler
 from werkzeug.exceptions import NotFound, MethodNotAllowed
@@ -17,6 +18,8 @@ from .models.models import User, Post, Comment
 from .utils import db
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+
+import sqlalchemy as sa
 
 
 def configure_logging(app):
@@ -64,11 +67,12 @@ def create_app(config=config_dict['prod']):
     api.add_namespace(post_namespace, path='/posts')
     api.add_namespace(auth_namespace, path='/auth')
 
-    configure_logging(app)
-
     db.init_app(app)
     jwt = JWTManager(app)
     migrate = Migrate(app, db)
+
+    configure_logging(app)
+    register_cli_commands(app)
 
     @api.errorhandler(NotFound)
     def not_found(error):
@@ -88,3 +92,12 @@ def create_app(config=config_dict['prod']):
         }
 
     return app
+
+
+def register_cli_commands(app):
+    @app.cli.command('init_db')
+    def initialize_database():
+        """Initialize the database."""
+        db.drop_all()
+        db.create_all()
+        echo('Initialized the database!')
