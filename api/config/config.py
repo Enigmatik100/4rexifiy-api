@@ -23,18 +23,10 @@ class Config:
     MAX_CONTENT_LENGTH = 1000 * 1024 * 1024  # 1000mb
     LOG_WITH_GUNICORN = config('LOG_WITH_GUNICORN', default=False)
 
-    if os.getenv('DATABASE_URL'):
-        SQLALCHEMY_DATABASE_URI = config('DATABASE_URL').replace("postgres://", "postgresql://", 1)
-    else:
-        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'api.utils.db')}"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # Logging
-    LOG_WITH_GUNICORN = config('LOG_WITH_GUNICORN', default=False)
-
 
 class DevConfig(Config):
     SQLALCHEMY_ECHO = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+    SQLALCHEMY_DATABASE_URI = uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
 
