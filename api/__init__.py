@@ -68,7 +68,7 @@ def create_app(config=config_dict['prod']):
     api.add_namespace(auth_namespace, path='/auth')
 
     configure_logging(app)
-    register_cli_commands(app)
+    # register_cli_commands(app)
 
     db.init_app(app)
     jwt = JWTManager(app)
@@ -90,6 +90,16 @@ def create_app(config=config_dict['prod']):
             'Post': Post,
             'Comment': Comment
         }
+
+    engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    inspector = sa.inspect(engine)
+    if not inspector.has_table("users"):
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            app.logger.info('Initialized the database!')
+    else:
+        app.logger.info('Database already contains the users table.')
 
     return app
 
