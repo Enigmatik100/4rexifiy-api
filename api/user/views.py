@@ -16,6 +16,6 @@ class PostGetCreate(Resource):
         Get all relative to specific user
         """
 
-        user = User.get_by_id(user_id)
+        user = User.get_or_404(user_id)
         posts = user.posts
         return posts, HTTPStatus.OK
